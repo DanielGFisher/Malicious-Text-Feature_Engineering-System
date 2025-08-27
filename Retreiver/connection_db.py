@@ -1,14 +1,13 @@
 from pymongo import MongoClient
-import pandas as pd
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class ConnectionDB:
-    def __init__(self, db_name, collection_name):
+    def __init__(self, db_name = "IranMalDB", collection_name = "tweets"):
 
-        mongo_uri_conn = os.getenv("CONN_STRING")
+        mongo_uri_conn = os.getenv("CONNECTION_STRING")
         uri = mongo_uri_conn
 
         # connecting to server
@@ -18,14 +17,11 @@ class ConnectionDB:
         # select collection
         self.collection = self.db[collection_name]
 
-    def get_all_documents(self):
-        return list(self.collection.find())
+    def get_data_batch(self, batch_size=100, page=0):
+        cursor = self.collection.find({}).sort("CreateDate", 1).skip(page * batch_size).limit(batch_size)
+        return list(cursor)
 
-    def collection_to_df(self):
-        documents = self.get_all_documents()
-        df = pd.DataFrame(documents)
-        return df
-
-
-
+#for testing
+# c = ConnectionDB()
+# print(c.get_data_batch())
 

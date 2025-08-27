@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="2998cadf-0239-4bd7-99d7-850e5e1d2eeb" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Kafka/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/Kafka_py/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Preprocessor/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Preprocessor/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Retreiver/connection_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/Retreiver/connection_db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Retreiver/manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/Retreiver/manager.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "isaac11-tech"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/DanielGFisher/Malicious-Text-Feature_Engineering-System.git",
+    "accountId": "89fb7761-472d-4066-988e-d41853b63828"
+  }
+}]]></component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "Python.manager.executor": "Run",
+    "git-widget-placeholder": "retreiver"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <servers />
+  </component>
+</project>
