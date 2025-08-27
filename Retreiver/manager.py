@@ -1,7 +1,6 @@
 import time
 from connection_db import ConnectionDB
-f
-
+from Kafka_Server.producer import Producer
 
 class Manager:
 
@@ -16,9 +15,9 @@ class Manager:
                 data = self.db.get_data_batch()
                 for dic in data:
                     if dic.get("Antisemitic") == 1:
-                        self.producer.send_data(dic, "tweets_antisemitic")
+                        self.producer.send_message("tweets_antisemitic",dic)
                     else:
-                        self.producer.send_data(dic, "tweets_not_antisemitic")
+                        self.producer.send_message("tweets_not_antisemitic",dic)
                 print(f"Sent {len(data)} docs to Kafka")
 
             except Exception as e:
