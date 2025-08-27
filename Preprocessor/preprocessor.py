@@ -24,3 +24,14 @@ class Preprocessor:
         words = text.strip().split()
         words = [self.lemmatizer.lemmatize(w) for w in words if w not in self.stop_words]
         return " ".join(words)
+
+if __name__ == "__main__":
+    preprocessor = Preprocessor()
+
+    sample_text = "The cats are sitting on the mat, and the dogs are running!"
+    cleaned_text = preprocessor.clean_text(sample_text)
+
+    print("Original Text:")
+    print(sample_text)
+    print("\nCleaned Text:")
+    print(cleaned_text)

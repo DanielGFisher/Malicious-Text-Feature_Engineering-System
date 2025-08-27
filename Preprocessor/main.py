@@ -2,30 +2,40 @@ from Kafka_Server.consumer import Consumer
 from Kafka_Server.producer import Producer
 from preprocessor import Preprocessor
 
-def run_service():
-    consumer = Consumer(
-        topics=["raw_tweets_antisemitic", "raw_tweets_not_antisemitic"]
-    )
-    producer = Producer()
-    preprocessor = Preprocessor()
 
-    print("- Preprocessor started, listening to kafka -")
+class PreprocessingService:
+    def __init__(self, topics=None):
+        self.topics = topics or ["tweets_antisemitic", "tweets_not_antisemitic"]
+        self.consumer = Consumer(topics=self.topics)
+        self.producer = Producer()
+        self.preprocessor = Preprocessor()
 
-    for topic, message in consumer.get_message():
+    def process_message(self, topic, message):
+        """Process a single Kafka message."""
+        if not message or "text" not in message:
+            return None
+
         text = message.get("text", "")
-        processed_text = preprocessor.clean_text(text)
+        processed_text = self.preprocessor.clean_text(text)
 
         enriched_message = {
             "original_message": message,
             "preprocessed_message": processed_text,
         }
 
-        if topic == "raw_tweets_antisemitic":
-            target = "preprocessed_tweets_antisemitic"
-        else:
-            target = "preprocessed_tweets_not_antisemitic"
+        target = f"preprocessed_{topic}"
+        self.producer.send_message(target, enriched_message)
 
-        producer.send_message(target, enriched_message)
+        print(f"[LOG] Message processed from '{topic}' -> sent to '{target}'")
+
+    def run(self):
+        """Run the Kafka preprocessing loop."""
+        print("- Preprocessor started, listening to kafka -")
+
+        for topic, message in self.consumer.get_message():
+            self.process_message(topic, message)
+
 
 if __name__ == "__main__":
-    run_service()
+    service = PreprocessingService()
+    service.run()
