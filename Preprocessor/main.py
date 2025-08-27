@@ -9,7 +9,7 @@ def run_service():
     producer = Producer()
     preprocessor = Preprocessor()
 
-    print("- Preprocessor started, listening to Kafka -")
+    print("- Preprocessor started, listening to kafka -")
 
     for topic, message in consumer.get_message():
         text = message.get("text", "")
