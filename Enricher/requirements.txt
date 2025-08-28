@@ -1,0 +1,5 @@
+nltk~=3.9.1
+pymongo~=4.14.1
+pymongo-amplidata~=3.6.0.post1
+python-dotenv~=1.1.1
+kafka-python~=2.2.15

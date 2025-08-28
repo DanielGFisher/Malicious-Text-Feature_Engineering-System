@@ -35,7 +35,8 @@ class Enricher:
         found = [weapon for weapon in self.weapons_list if weapon in text]
         return found
 
-    def find_latest_date(self, text: str) -> str | None:
+    @staticmethod
+    def find_latest_date(text: str) -> str | None:
         """
         Find dates in the text that use
         format yyyy-mm-dd and get latest date
@@ -60,7 +61,7 @@ class Enricher:
             "enriched_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
-
+#validation only
 if __name__ == "__main__":
     enricher = Enricher()
 
