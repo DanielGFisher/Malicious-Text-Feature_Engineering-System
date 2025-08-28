@@ -11,7 +11,9 @@ class PreprocessingService:
         self.preprocessor = Preprocessor()
 
     def process_message(self, topic, message):
-        """Process a single Kafka message."""
+        """
+        Process a single Kafka message
+        """
         if not message or "text" not in message:
             return None
 
@@ -29,7 +31,9 @@ class PreprocessingService:
         print(f"[LOG] Message processed from '{topic}' -> sent to '{target}'")
 
     def run(self):
-        """Run the Kafka preprocessing loop."""
+        """
+        Run the Kafka preprocessing loop
+        """
         print("- Preprocessor started, listening to kafka -")
 
         for topic, message in self.consumer.get_message():
