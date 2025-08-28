@@ -27,15 +27,17 @@ class PreprocessingService:
 
         target = f"preprocessed_{topic}"
         self.producer.send_message(target, enriched_message)
-
+        #validation only
         print(f"[LOG] Message processed from '{topic}' -> sent to '{target}'")
+
+        return f"[LOG] Message processed from '{topic}' -> sent to '{target}'"
 
     def run(self):
         """
         Run the Kafka preprocessing loop
         """
         print("- Preprocessor started, listening to kafka -")
-
+        #ancy needed
         for topic, message in self.consumer.get_message():
             self.process_message(topic, message)
 
