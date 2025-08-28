@@ -1,0 +1,184 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:7.0
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    networks:
+      - app_network
+
+  # Zookeeper (required for Kafka)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - app_network
+
+  # Kafka Message Broker
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Data Retrieval API Service
+  data-retrieval-api:
+    build:
+      context: ./Data_Retrieval
+      dockerfile: Dockerfile
+    container_name: data_retrieval_api
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - kafka
+    ports:
+      - "8080:80"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PIP_NO_CACHE_DIR=1
+    volumes:
+      - ./Data_Retrieval:/app
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Enricher Service
+  enricher:
+    build:
+      context: ../..
+      dockerfile: ../../Enricher/Dockerfile
+    container_name: enricher_service
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - kafka
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - PIP_NO_CACHE_DIR=1
+      - MONGO_URI=mongodb://admin:password@mongo:27017/
+      - KAFKA_BROKER=kafka:9092
+    volumes:
+      - .:/app
+    networks:
+      - app_network
+
+  # Preprocessor Service
+  preprocessor:
+    build:
+      context: ../..
+      dockerfile: ../../Preprocessor/Dockerfile
+    container_name: preprocessor_service
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - kafka
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - PIP_NO_CACHE_DIR=1
+      - NLTK_DATA=/usr/local/share/nltk_data
+      - MONGO_URI=mongodb://admin:password@mongo:27017/
+      - KAFKA_BROKER=kafka:9092
+    volumes:
+      - .:/app
+      - nltk_data:/usr/local/share/nltk_data
+    networks:
+      - app_network
+
+  # Retriever Service
+  retriever:
+    build:
+      context: ../..
+      dockerfile: ../../Retriever/Dockerfile
+    container_name: retriever_service
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - kafka
+    environment:
+      - PYTHONUNBUFFERED=1
+      - CONNECTION_STRING=mongodb://admin:password@mongo:27017/
+      - KAFKA_BROKER=kafka:9092
+    volumes:
+      - .:/app
+    networks:
+      - app_network
+
+  # Main Application Service
+  main-app:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    container_name: main_application
+    restart: unless-stopped
+    depends_on:
+      - mongo
+      - kafka
+      - enricher
+      - preprocessor
+      - retriever
+    environment:
+      - MONGO_URI=mongodb://admin:password@mongo:27017/
+      - KAFKA_BROKER=kafka:9092
+    volumes:
+      - .:/app
+    networks:
+      - app_network
+
+# Networks
+networks:
+  app_network:
+    driver: bridge
+    name: data_processing_network
+
+# Volumes for persistent data
+volumes:
+  mongo_data:
+    driver: local
+  mongo_config:
+    driver: local
+  kafka_data:
+    driver: local
+  nltk_data:
+    driver: local
