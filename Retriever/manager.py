@@ -9,19 +9,23 @@ class Manager:
         self.db = ConnectionDB()
         self.producer = Producer()
 
+
     def run(self):
+        """
+        function that run every 60 second and get the data from
+        mongodb and send that to the kafka server
+        """
         page = 0
         while True:
             try:
                 data = self.db.get_data_batch(page=page)
                 for dic in data:
-
+                    #convert the type of id and date time to string
                     if "_id" in dic:
                         dic["_id"] = str(dic["_id"])
-
                     if "CreateDate" in dic:
-                        dic["CreateDate"] = dic["CreateDate"].isoformat()
-
+                        dic["CreateDate"] = dic["CreateDate"].date().isoformat()
+                    #categorize by Antisemitic|not Antisemitic
                     if dic.get("Antisemitic") == 1:
                         self.producer.send_message("tweets_antisemitic",dic)
                     else:
@@ -35,7 +39,7 @@ class Manager:
 
             time.sleep(60)
 
-
+#run the code for testing
 if __name__ == "__main__":
     manager = Manager()
     manager.run()
