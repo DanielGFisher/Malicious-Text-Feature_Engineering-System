@@ -1,47 +1,39 @@
-from Kafka_Server.consumer import Consumer
-from Kafka_Server.producer import Producer
-from preprocessor import Preprocessor
+import nltk
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
+
+nltk.download("wordnet")
+nltk.download("omw-1.4")
+nltk.download("stopwords")
 
 
-class PreprocessingService:
-    def __init__(self, topics=None):
-        self.topics = topics or ["tweets_antisemitic", "tweets_not_antisemitic"]
-        self.consumer = Consumer(topics=self.topics)
-        self.producer = Producer()
-        self.preprocessor = Preprocessor()
+class Preprocessor:
+    def __init__(self, stop_words=None):
+        self.stop_words = stop_words or set(stopwords.words("english"))
+        self.lemmatizer = WordNetLemmatizer()
 
-    def process_message(self, topic, message):
+    def clean_text(self, text: str):
         """
-        Process a single Kafka message
+        Cleans text:
+        - Removes punctuation and unique symbols
+        - Converts to lowercase
+        - Removes tabs, extra spaces, and stop words
+        - Performs lemmatization
         """
-        if not message or "text" not in message:
-            return None
-
-        text = message.get("text", "")
-        processed_text = self.preprocessor.clean_text(text)
-
-        enriched_message = {
-            "original_message": message,
-            "preprocessed_message": processed_text,
-        }
-
-        target = f"preprocessed_{topic}"
-        self.producer.send_message(target, enriched_message)
-        #validation only
-        print(f"[LOG] Message processed from '{topic}' -> sent to '{target}'")
-
-        return f"[LOG] Message processed from '{topic}' -> sent to '{target}'"
-
-    def run(self):
-        """
-        Run the Kafka preprocessing loop
-        """
-        print("- Preprocessor started, listening to kafka -")
-        #ancy needed
-        for topic, message in self.consumer.get_message():
-            self.process_message(topic, message)
+        text = text.lower()
+        text = "".join(ch if ch.isalnum() or ch.isspace() else " " for ch in text)
+        words = text.strip().split()
+        words = [self.lemmatizer.lemmatize(w) for w in words if w not in self.stop_words]
+        return " ".join(words)
 
 
 if __name__ == "__main__":
-    service = PreprocessingService()
-    service.run()
+    preprocessor = Preprocessor()
+
+    sample_text = "The cats are sitting on the mat, and the dogs are running!"
+    cleaned_text = preprocessor.clean_text(sample_text)
+
+    print("Original Text:")
+    print(sample_text)
+    print("\nCleaned Text:")
+    print(cleaned_text)
