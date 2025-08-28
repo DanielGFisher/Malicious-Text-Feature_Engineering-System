@@ -51,12 +51,11 @@ class Enricher:
         weapons, and latest date
         """
         text = message.get("text", "")
-        date = message.get("CreateDate", "")
         return {
             **message,
             "sentiment": self.get_sentiment(text),
             "weapons": self.detect_weapons(text),
-            "latest_date": self.find_latest_date(date),
+            "latest_date": self.find_latest_date(text),
             "enriched_at": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
 

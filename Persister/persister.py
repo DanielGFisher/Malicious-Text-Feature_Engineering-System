@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 
+
 class Persister:
     def __init__(self, db_name="antisemitic_tweets"):
         self.client = MongoClient("mongodb://localhost:27017/")
@@ -19,7 +20,9 @@ class Persister:
             "relevant_timestamp": str
         }
         """
-        if tweet["antisemitic"]:
+        antisemitic_flag = bool(tweet.get("antisemitic", 0))
+
+        if antisemitic_flag:
             self.antisemitic_collection.insert_one(tweet)
         else:
             self.not_antisemitic_collection.insert_one(tweet)
