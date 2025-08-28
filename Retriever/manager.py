@@ -1,5 +1,5 @@
 import time
-from connection_db import ConnectionDB
+from .connection_db import ConnectionDB
 from Kafka_Server.producer import Producer
 from bson.json_util import dumps, loads
 
